@@ -120,7 +120,7 @@ def main():
         listen="0.0.0.0",
         port=PORT,
         url_path=BOT_TOKEN,
-        webhook_url=f"https://your-app.onrender.com/{BOT_TOKEN}"
+        webhook_url=f"https://bot.onrender.com/{BOT_TOKEN}"
     )
 
 if __name__ == "__main__":
