@@ -5,7 +5,6 @@ from datetime import datetime, date
 from pathlib import Path
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from flask import Flask, jsonify  # <-- Добавили Flask
 
 # ========== CONFIG ==========
 PORT = int(os.environ.get("PORT", 10000))
@@ -29,9 +28,6 @@ IMAGES = [
 ]
 # FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
 FINAL_MEDIA = "https://downloader.disk.yandex.ru/preview/19eb2ab206e7b45a42fd76914282c1ab253c0afc9f956612375e6bfacd2cd02d/693b67b4/Rpp2SJB1b8U2X7TjKcU9RdrxUwKcvalbOhvJ2QGL6kZq1lXzaaB8pAFaOwFQGQyE8z5MRXKLkeOAIfUuWHPvow%3D%3D?uid=0&filename=sketch-1763678667830.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=0&tknv=v3&size=1920x838"
-
-# ========== FLASK SERVER (для Render) ==========
-app = Flask(__name__)
 
 @app.route('/ping')
 def ping():
