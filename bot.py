@@ -11,10 +11,22 @@ from flask import Flask, jsonify  # <-- Добавили Flask
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 DATA_FILE = Path("users.json")
 IMAGES = [
-    # ... добавь 14 ссылок
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763678667830.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763678877771.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763680517099.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763682560118.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763741228535.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763741339403.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763743851221.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1764196038841.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1764196842233.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1764199126615.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1764205314273.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1764270762339.jpg",
+    "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1764885466374.jpg"
 ]
-FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
-
+# FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
+FINAL_MEDIA = ""
 # ========== FLASK SERVER (для Render) ==========
 app = Flask(__name__)
 
