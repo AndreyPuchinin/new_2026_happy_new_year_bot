@@ -11,6 +11,7 @@ from flask import Flask, jsonify  # <-- Добавили Flask
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 DATA_FILE = Path("users.json")
 IMAGES = [
+    "https://downloader.disk.yandex.ru/preview/19eb2ab206e7b45a42fd76914282c1ab253c0afc9f956612375e6bfacd2cd02d/693b67b4/Rpp2SJB1b8U2X7TjKcU9RdrxUwKcvalbOhvJ2QGL6kZq1lXzaaB8pAFaOwFQGQyE8z5MRXKLkeOAIfUuWHPvow%3D%3D?uid=0&filename=sketch-1763678667830.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=0&tknv=v3&size=1920x838",
     "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763678667830.jpg",
     "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763678877771.jpg",
     "https://disk.yandex.ru/d/y7vrmCpcQaGJvA/sketch-1763680517099.jpg",
