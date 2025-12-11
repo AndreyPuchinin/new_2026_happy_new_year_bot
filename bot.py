@@ -29,7 +29,7 @@ IMAGES = [
 # FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
 FINAL_MEDIA = "https://downloader.disk.yandex.ru/preview/19eb2ab206e7b45a42fd76914282c1ab253c0afc9f956612375e6bfacd2cd02d/693b67b4/Rpp2SJB1b8U2X7TjKcU9RdrxUwKcvalbOhvJ2QGL6kZq1lXzaaB8pAFaOwFQGQyE8z5MRXKLkeOAIfUuWHPvow%3D%3D?uid=0&filename=sketch-1763678667830.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=0&tknv=v3&size=1920x838"
 
-@app.route('/ping')
+@bot.route('/ping')
 def ping():
     return jsonify({"status": "alive", "bot": "new_year_bot"})
 
@@ -110,12 +110,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ========== MAIN ==========
 def main():
     logging.basicConfig(level=logging.INFO)
-    app = Application.builder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    bot = Application.builder().token(BOT_TOKEN).build()
+    bot.add_handler(CommandHandler("start", start))
+    bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     # Webhook URL будет: https://your-app.onrender.com/<BOT_TOKEN>
-    app.run_webhook(
+    bot.run_webhook(
         listen="0.0.0.0",
         port=PORT,
         url_path=BOT_TOKEN,
