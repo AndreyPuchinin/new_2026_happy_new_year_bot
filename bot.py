@@ -28,10 +28,10 @@ IMAGES = [
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764199126615.jpg",
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764205314273.jpg",
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764270762339.jpg",
-   "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg",
+   "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
 ]
 # FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
-FINAL_MEDIA = "https://downloader.disk.yandex.ru/preview/19eb2ab206e7b45a42fd76914282c1ab253c0afc9f956612375e6bfacd2cd02d/693b67b4/Rpp2SJB1b8U2X7TjKcU9RdrxUwKcvalbOhvJ2QGL6kZq1lXzaaB8pAFaOwFQGQyE8z5MRXKLkeOAIfUuWHPvow%3D%3D?uid=0&filename=sketch-1763678667830.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg&owner_uid=0&tknv=v3&size=1920x838"
+FINAL_MEDIA = "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
 
 # Flask-часть (не нужна)
 # @bot.route('/ping')
@@ -108,29 +108,39 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
         else:
             if idx < len(IMAGES):
-                await update.message.reply_photo(IMAGES[idx], caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining}")
-                user["last_claimed_date"] = today
-                user["next_image_index"] = idx + 1
-                save_data(data)
+               await update.message.reply_photo(IMAGES[idx], caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining}")
+               user["last_claimed_date"] = today
+               user["next_image_index"] = idx + 1
+               save_data(data)
             else:
-                await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
+               await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
 
-            # Проверка: сегодня 1 января?
             # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
-            # now = datetime.now().date()
-            # Для продакшена
-            FINAL_DATE = date(2026, 1, 1)
-            
             if not user.get("has_received_final_greeting", False):
-               now = date.today()  # ← вот так
-               FINAL_DATE = date(2026, 1, 1)
-               if now >= FINAL_DATE:
-                  await update.message.reply_animation(
-                     FINAL_MEDIA,
-                     caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-                  )
-                  user["has_received_final_greeting"] = True
-                  save_data(data)
+               # ===== РЕЖИМ ТЕСТА =====
+               TEST_MODE = True  # ← поменяй на False в продакшене!
+               if TEST_MODE:
+                  # Используем "тестовые дни"
+                  test_day_number = int(today.split("_")[-1])
+                  TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
+                  if test_day_number >= TEST_FINAL_DAY:
+                     await update.message.reply_animation(
+                            FINAL_MEDIA,
+                            caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+                        )
+                        user["has_received_final_greeting"] = True
+                        save_data(data)
+               # ===== РЕЖИМ ПРОДАКШЕНА =====
+               else:
+                  now = date.today()
+                  FINAL_DATE = date(2026, 1, 1)
+                  if now >= FINAL_DATE:
+                     await update.message.reply_animation(
+                        FINAL_MEDIA,
+                        caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+                     )
+                     user["has_received_final_greeting"] = True
+                     save_data(data)
 
     else:
         await update.message.reply_text("Неизвестная команда. Используй кнопки ниже.")
