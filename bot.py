@@ -103,6 +103,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
        if TEST_MODE:
           # Используем "тестовые дни"
           test_day_number = int(today.split("_")[-1])
+          logging.info(f"{test_day_number=}")
           TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
           if test_day_number >= TEST_FINAL_DAY:
              await update.message.reply_animation(
