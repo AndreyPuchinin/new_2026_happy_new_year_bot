@@ -96,6 +96,33 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user = data.setdefault(user_id, {"last_claimed_date": None, "next_image_index": 0})
 
+    # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
+    if not user.get("has_received_final_greeting", False):
+       # ===== РЕЖИМ ТЕСТА =====
+       TEST_MODE = True  # ← поменяй на False в продакшене!
+       if TEST_MODE:
+          # Используем "тестовые дни"
+          test_day_number = int(today.split("_")[-1])
+          TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
+          if test_day_number >= TEST_FINAL_DAY:
+             await update.message.reply_animation(
+                FINAL_MEDIA,
+                caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+             )
+            user["has_received_final_greeting"] = True
+            save_data(data)
+        # ===== РЕЖИМ ПРОДАКШЕНА =====
+        else:
+           now = date.today()
+           FINAL_DATE = date(2026, 1, 1)
+           if now >= FINAL_DATE:
+              await update.message.reply_animation(
+                 FINAL_MEDIA,
+                 caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+              )
+              user["has_received_final_greeting"] = True
+              save_data(data)
+   
     if text == "Повторить приветствие":
         await start(update, context)
 
@@ -130,33 +157,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                   else:
                      # На всякий случай (если idx как-то вышел за пределы)
                      await update.message.reply_text("🎉 Ты собрал все картинки!")
-
-            # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
-            if not user.get("has_received_final_greeting", False):
-               # ===== РЕЖИМ ТЕСТА =====
-               TEST_MODE = True  # ← поменяй на False в продакшене!
-               if TEST_MODE:
-                  # Используем "тестовые дни"
-                  test_day_number = int(today.split("_")[-1])
-                  TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
-                  if test_day_number >= TEST_FINAL_DAY:
-                     await update.message.reply_animation(
-                            FINAL_MEDIA,
-                            caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-                        )
-                     user["has_received_final_greeting"] = True
-                     save_data(data)
-               # ===== РЕЖИМ ПРОДАКШЕНА =====
-               else:
-                  now = date.today()
-                  FINAL_DATE = date(2026, 1, 1)
-                  if now >= FINAL_DATE:
-                     await update.message.reply_animation(
-                        FINAL_MEDIA,
-                        caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-                     )
-                     user["has_received_final_greeting"] = True
-                     save_data(data)
 
     else:
         await update.message.reply_text("Неизвестная команда. Используй кнопки ниже.")
