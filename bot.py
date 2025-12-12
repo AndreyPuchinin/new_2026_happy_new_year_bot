@@ -111,17 +111,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
              )
              user["has_received_final_greeting"] = True
              save_data(data)
-        # ===== РЕЖИМ ПРОДАКШЕНА =====
-        else:
-           now = date.today()
-           FINAL_DATE = date(2026, 1, 1)
-           if now >= FINAL_DATE:
-              await update.message.reply_animation(
-                 FINAL_MEDIA,
-                 caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-              )
-              user["has_received_final_greeting"] = True
-              save_data(data)
+       # ===== РЕЖИМ ПРОДАКШЕНА =====
+       else:
+          now = date.today()
+          FINAL_DATE = date(2026, 1, 1)
+          if now >= FINAL_DATE:
+             await update.message.reply_animation(
+                FINAL_MEDIA,
+                caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+             )
+             user["has_received_final_greeting"] = True
+             save_data(data)
    
     if text == "Повторить приветствие":
         await start(update, context)
