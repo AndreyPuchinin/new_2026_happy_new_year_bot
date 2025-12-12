@@ -128,8 +128,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             FINAL_MEDIA,
                             caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
                         )
-                        user["has_received_final_greeting"] = True
-                        save_data(data)
+                     user["has_received_final_greeting"] = True
+                     save_data(data)
                # ===== РЕЖИМ ПРОДАКШЕНА =====
                else:
                   now = date.today()
