@@ -1,12 +1,17 @@
 import os
 import json
 import logging
+import requests
 from datetime import datetime, date
 from pathlib import Path
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 # ========== CONFIG ==========
+GIST_ID = os.environ["GIST_ID"]
+GIST_TOKEN = os.environ["GIST_TOKEN"]
+GIST_URL = f"https://api.github.com/gists/{GIST_ID}"
+
 PORT = int(os.environ.get("PORT", 10000))
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 DATA_FILE = Path("users.json")
@@ -36,14 +41,24 @@ FINAL_MEDIA = "https://downloader.disk.yandex.ru/preview/19eb2ab206e7b45a42fd769
 
 # ========== DATA HELPERS ==========
 def load_data():
-    if DATA_FILE.exists():
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+    headers = {"Authorization": f"token {GIST_TOKEN}"}
+    try:
+        resp = requests.get(GIST_URL, headers=headers)
+        content = resp.json()["files"]["users.json"]["content"]
+        return json.loads(content)
+    except:
+        return {}
 
 def save_data(data):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    headers = {"Authorization": f"token {GIST_TOKEN}"}
+    payload = {
+        "files": {
+            "users.json": {
+                "content": json.dumps(data, ensure_ascii=False, indent=2)
+            }
+        }
+    }
+    requests.patch(GIST_URL, headers=headers, json=payload)
         
 #========== TEMP TIME CHANGE FOR TESTS ==========
 def get_current_test_day():
