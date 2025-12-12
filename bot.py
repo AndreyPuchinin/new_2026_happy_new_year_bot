@@ -105,15 +105,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         remaining = total_images - idx  # ← вычисляем ДО if
 
         if user["last_claimed_date"] == today:
-            await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
-        else:
-            if idx < len(IMAGES):
-               await update.message.reply_photo(IMAGES[idx], caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining+1}")
-               user["last_claimed_date"] = today
-               user["next_image_index"] = idx + 1
-               save_data(data)
-            else:
-               await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
+            await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining-1}")
+        elif idx < len(IMAGES):
+            await update.message.reply_photo(IMAGES[idx], caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining}")
+            user["last_claimed_date"] = today
+            user["next_image_index"] = idx + 1
+            save_data(data)
+         else:
+            await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
 
             # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
             if not user.get("has_received_final_greeting", False):
