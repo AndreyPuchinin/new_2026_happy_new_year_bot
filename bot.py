@@ -105,7 +105,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         remaining = total_images - idx  # ← вычисляем ДО if
 
         if user["last_claimed_date"] == today:
-            await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
+            await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining-1}")
         else:
             if idx < len(IMAGES):
                await update.message.reply_photo(IMAGES[idx], caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining}")
