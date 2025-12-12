@@ -100,24 +100,36 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await start(update, context)
 
     elif text == "Получить картинку":
-        idx = user["next_image_index"]
-        total_images = len(IMAGES)
-        remaining = total_images - idx  # ← вычисляем ДО if
+         idx = user["next_image_index"]
+         total_images = len(IMAGES)
+         remaining = total_images - idx  # сколько картинок ещё не отправлено
 
-        if user["last_claimed_date"] == today:
-            await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining-1}")
-            if idx == len(IMAGES):
-               await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
-               user["last_claimed_date"] = today
-               user["next_image_index"] = idx + 1
-               save_data(data)
-        elif idx < len(IMAGES):
-            await update.message.reply_photo(IMAGES[idx], caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining-1}")
-            user["last_claimed_date"] = today
-            user["next_image_index"] = idx + 1
-            save_data(data)
-        if user["last_claimed_date"] == today and (idx > len(IMAGES)):
-            await update.message.reply_text("🎉 Ты собрал все картинки!")
+         if text == "Получить картинку":
+            if user["last_claimed_date"] == today:
+               # Уже брали картинку сегодня
+               if idx >= total_images:
+                  await update.message.reply_text("🎉 Ты собрал все картинки!")
+               else:
+                  await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
+            else:
+                  # Берём новую картинку
+                  if idx < total_images:
+                     # Отправляем картинку
+                     await update.message.reply_photo(
+                        IMAGES[idx],
+                        caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining - 1}"
+                     )
+                     user["last_claimed_date"] = today
+                     user["next_image_index"] = idx + 1
+
+                     # Проверка: это была последняя картинка?
+                     if idx + 1 == total_images:
+                        await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
+
+                     save_data(data)
+                  else:
+                     # На всякий случай (если idx как-то вышел за пределы)
+                     await update.message.reply_text("🎉 Ты собрал все картинки!")
 
             # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
             if not user.get("has_received_final_greeting", False):
