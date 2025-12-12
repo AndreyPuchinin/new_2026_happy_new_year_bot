@@ -75,6 +75,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     text = update.message.text
     today = get_current_test_day()
+    # Извлекаем номер "дня" из строки
+    test_day_number = int(today.split("_")[-1])
     # today = str(date.today())
 
     data = load_data()
@@ -115,12 +117,15 @@ def main():
     bot.add_handler(CommandHandler("start", start))
     bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    # Webhook URL будет: https://your-app.onrender.com/<BOT_TOKEN>
+    SERVICE_NAME = "new-2026-happy-new-year-bot"  # ← замени на имя твоего сервиса!
+    service_webhook_url = f"https://{SERVICE_NAME}.onrender.com/{BOT_TOKEN}"
+    
+    # Webhook URL будет: https://<SERVICE_NAME>.onrender.com/<BOT_TOKEN>
     bot.run_webhook(
         listen="0.0.0.0",
         port=PORT,
         url_path=BOT_TOKEN,
-        webhook_url=f"https://bot.onrender.com/{BOT_TOKEN}"
+        webhook_url=service_webhook_url
     )
 
 if __name__ == "__main__":
