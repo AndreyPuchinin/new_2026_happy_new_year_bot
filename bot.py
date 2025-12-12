@@ -111,7 +111,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user["last_claimed_date"] = today
             user["next_image_index"] = idx + 1
             save_data(data)
-         else:
+        else:
             await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
 
             # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
