@@ -115,20 +115,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
 
-            # Проверка: сегодня 31 декабря?
+            # Проверка: сегодня 1 января?
             # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
             # now = datetime.now().date()
             # Для продакшена
             FINAL_DATE = date(2026, 1, 1)
             
             if not user.get("has_received_final_greeting", False):
-                if now >= FINAL_DATE:
-                    await update.message.reply_animation(
-                        FINAL_MEDIA,
-                        caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-                    )
-                    user["has_received_final_greeting"] = True
-                    save_data(data)
+               now = date.today()  # ← вот так
+               FINAL_DATE = date(2026, 1, 1)
+               if now >= FINAL_DATE:
+                  await update.message.reply_animation(
+                     FINAL_MEDIA,
+                     caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+                 )
+                 user["has_received_final_greeting"] = True
+                 save_data(data)
 
     else:
         await update.message.reply_text("Неизвестная команда. Используй кнопки ниже.")
