@@ -100,6 +100,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_data()
     user = data.setdefault(user_id, {"last_claimed_date": None, "next_image_index": 0})
 
+    TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
+   
     # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
     if not user.get("has_received_final_greeting", False):
        # ===== РЕЖИМ ТЕСТА =====
@@ -108,7 +110,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
           # Используем "тестовые дни"
           test_day_number = int(today.split("_")[-1])
           logging.info(f"{test_day_number=}")
-          TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
           if test_day_number >= TEST_FINAL_DAY:
              await update.message.reply_animation(
                 FINAL_MEDIA,
