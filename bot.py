@@ -64,15 +64,15 @@ def save_data(data):
 # Фиксируем момент первого импорта модуля — это и есть "время старта теста"
 _START_TIME = datetime.now()
 
-def get_current_test_day():
-    """Возвращает номер 'дня' с момента запуска бота (в тестовом режиме).
-    1 'день' = 1 минута.
-    """
-    now = datetime.now()
-    elapsed_seconds = (now - _START_TIME).total_seconds()
-    # Каждую 1 минуты = 60 секунд → новый "день"
-    day_number = int(elapsed_seconds // 60)
-    return f"test_day_{day_number}"
+# def get_current_test_day():
+#    """Возвращает номер 'дня' с момента запуска бота (в тестовом режиме).
+#    1 'день' = 1 минута.
+#    """
+#    now = datetime.now()
+#    elapsed_seconds = (now - _START_TIME).total_seconds()
+#    # Каждую 1 минуты = 60 секунд → новый "день"
+#    day_number = int(elapsed_seconds // 60)
+#    return f"test_day_{day_number}"
    
 # def get_current_test_day():
 #    now = datetime.now()
@@ -108,7 +108,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
 
     # ==== ВЫЧИСЛЯЕМ ДЕНЬ (ТЕСТ) ИЛИ ДАТУ (ПРОД) ====
-    TEST_MODE = True  # ← поменяй на False в продакшене!
+    TEST_MODE = False  # ← поменяй на False в продакшене!
     if TEST_MODE:
         today = get_current_test_day()  # например: "test_day_1"
         test_day_number = int(today.split("_")[-1])
