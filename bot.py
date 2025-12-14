@@ -62,11 +62,18 @@ def save_data(data):
 #========== TEMP TIME CHANGE FOR TESTS ==========
 def get_current_test_day():
     now = datetime.now()
-    # Каждые 2 минуты — новый "день"
-    epoch = now - datetime(2025, 12, 1)  # базовая дата (начало ТЗ)
-    minutes_since_start = int(epoch.total_seconds() // 60)
-    test_day_number = minutes_since_start # // 1 # // 2  # каждые 2 минуты — новый день
-    return f"test_day_{test_day_number}"
+    # Берём ТОЛЬКО минуты текущего часа (0–59)
+    current_minute = now.minute
+    # Каждая минута = 1 "день"
+    return f"test_day_{current_minute}"
+   
+# def get_current_test_day():
+#    now = datetime.now()
+#    # Каждые 2 минуты — новый "день"
+#    epoch = now - datetime(2025, 12, 1)  # базовая дата (начало ТЗ)
+#    minutes_since_start = int(epoch.total_seconds() // 60)
+#    test_day_number = minutes_since_start # // 1 # // 2  # каждые 2 минуты — новый день
+#    return f"test_day_{test_day_number}"
 
 # ========== HANDLERS ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -92,76 +99,67 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     text = update.message.text
-    today = get_current_test_day()
-    # Извлекаем номер "дня" из строки
-    test_day_number = int(today.split("_")[-1])
-    # today = str(date.today())
 
+    # ==== ВЫЧИСЛЯЕМ ДЕНЬ (ТЕСТ) ИЛИ ДАТУ (ПРОД) ====
+    TEST_MODE = True  # ← поменяй на False в продакшене!
+    if TEST_MODE:
+        today = get_current_test_day()  # например: "test_day_1"
+        test_day_number = int(today.split("_")[-1])
+        is_new_year = test_day_number >= 2  # ← НГ на 2-й минуте
+    else:
+        today = str(date.today())
+        is_new_year = date.today() >= date(2026, 1, 1)
+
+    # ==== ЗАГРУЖАЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ====
     data = load_data()
-    user = data.setdefault(user_id, {"last_claimed_date": None, "next_image_index": 0})
+    user = data.setdefault(user_id, {
+        "last_claimed_date": None,
+        "next_image_index": 0,
+        "has_received_final_greeting": False
+    })
 
-    # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
-    if not user.get("has_received_final_greeting", False):
-       # ===== РЕЖИМ ТЕСТА =====
-       TEST_MODE = True  # ← поменяй на False в продакшене!
-       if TEST_MODE:
-          # Используем "тестовые дни"
-          test_day_number = int(today.split("_")[-1])
-          TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
-          logging.info(f"test_day_number = {test_day_number}")
-          if test_day_number >= TEST_FINAL_DAY:
-             await update.message.reply_animation(
-                FINAL_MEDIA,
-                caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-             )
-             user["has_received_final_greeting"] = True
-             save_data(data)
-       # ===== РЕЖИМ ПРОДАКШЕНА =====
-       else:
-          now = date.today()
-          FINAL_DATE = date(2026, 1, 1)
-          if now >= FINAL_DATE:
-             await update.message.reply_animation(
-                FINAL_MEDIA,
-                caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-             )
-             user["has_received_final_greeting"] = True
-             save_data(data)
-   
+    # ==== ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ (1 РАЗ НА ПОЛЬЗОВАТЕЛЯ) ====
+    if is_new_year and not user.get("has_received_final_greeting", False):
+        await update.message.reply_animation(
+            FINAL_MEDIA,
+            caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+        )
+        user["has_received_final_greeting"] = True
+        save_data(data)
+
+    # ==== ОБРАБОТКА КНОПОК ====
     if text == "Повторить приветствие":
         await start(update, context)
 
-    elif text == "Получить картинку":
-         idx = user["next_image_index"]
-         total_images = len(IMAGES)
-         remaining = total_images - idx  # сколько картинок ещё не отправлено
-
-         if text == "Получить картинку":
+    elif text == "Получить попку 🍑":
+        if is_new_year:
+            # После НГ — никаких картинок
+            await update.message.reply_text("🎆 Вот и отгремел Новый 2026 Год! Время попок 🍑 закончилось :)")
+        else:
+            # До НГ — логика выдачи картинок
             if user["last_claimed_date"] == today:
-               # Уже брали картинку сегодня
-               if idx >= total_images:
-                  await update.message.reply_text("🎉 Ты собрал все попки! 🍑")
-               else:
-                  await update.message.reply_text(f"Сегодняшняя попка 🍑 уже получена! {remaining} попок осталось.")
+                idx = user["next_image_index"]
+                total_images = len(IMAGES)
+                remaining = total_images - idx
+                await update.message.reply_text(
+                    f"Сегодняшняя попка 🍑 уже получена! {remaining} попок осталось."
+                )
             else:
-                  # Берём новую картинку
-                  if idx < total_images:
-                     # Отправляем картинку
-                     await update.message.reply_photo(
+                idx = user["next_image_index"]
+                total_images = len(IMAGES)
+                remaining = total_images - idx
+                if idx < total_images:
+                    await update.message.reply_photo(
                         IMAGES[idx],
                         caption=f"🍑 Попка {idx + 1} из {total_images}. {remaining - 1} попок осталось."
-                     )
-                     user["last_claimed_date"] = today
-                     user["next_image_index"] = idx + 1
-
-                     # Проверка: это была последняя картинка?
-                     if idx + 1 == total_images:
+                    )
+                    user["last_claimed_date"] = today
+                    user["next_image_index"] = idx + 1
+                    if idx + 1 == total_images:
                         await update.message.reply_text("🎉 Ура! Ты собрал все попки! 🍑")
-
-                     save_data(data)
-                  else:
-                     # На всякий случай (если idx как-то вышел за пределы)
-                     await update.message.reply_text("🎉 Ты собрал все попки! 🍑")
+                    save_data(data)
+                else:
+                    await update.message.reply_text("🎉 Ты собрал все попки! 🍑")
 
     else:
         await update.message.reply_text("Неизвестная команда. Используй кнопки ниже.")
