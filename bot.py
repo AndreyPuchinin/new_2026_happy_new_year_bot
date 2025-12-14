@@ -28,10 +28,11 @@ IMAGES = [
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764199126615.jpg",
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764205314273.jpg",
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764270762339.jpg",
-   "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
+   "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg",
+   "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1765741210675.jpg"
 ]
 # FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
-FINAL_MEDIA = "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
+FINAL_MEDIA = "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/поздравляшка.mp4"
 
 # Flask-часть (не нужна)
 # @bot.route('/ping')
