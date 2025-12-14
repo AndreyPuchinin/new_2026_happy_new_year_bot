@@ -31,7 +31,7 @@ IMAGES = [
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
 ]
 # FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
-FINAL_MEDIA = "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/поздравляшка пока без звука.mp4"
+FINAL_MEDIA = "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
 
 # Flask-часть (не нужна)
 # @bot.route('/ping')
@@ -63,15 +63,15 @@ def save_data(data):
 def get_current_test_day():
     now = datetime.now()
     # Каждые 2 минуты — новый "день"
-    epoch = datetime(2025, 12, 1) - now  # базовая дата (начало ТЗ)
-    minutes_since_start = -int(epoch.total_seconds() // 60)
+    epoch = now - datetime(2025, 12, 1)  # базовая дата (начало ТЗ)
+    minutes_since_start = int(epoch.total_seconds() // 60)
     test_day_number = minutes_since_start # // 1 # // 2  # каждые 2 минуты — новый день
     return f"test_day_{test_day_number}"
 
 # ========== HANDLERS ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        ["Получить попку 🍑"],
+        ["Получить картинку"],
         ["Повторить приветствие"]
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
@@ -80,10 +80,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Привет, я Попкослатель! 🍑\n\n"
         "У меня для тебя 14 новогодних попок. За день я могу прислать тебе всего 1 попку)\n\n"
         "Не пропускай дни и ты получишь максимум новогоднего настроения 🎄\n\n"
-        "Подпишись на мой канал, чтобы оставаться со мной не только в рамках нового года и смотреть на попки круглый год:\n"
-        "https://t.me/tacsolos\n\n"
-        "А бота для меня сделал Андрей Кубик, вот его канал:\n"
-        "https://t.me/AndyKybik\n\n"
         "А если останешься со мной до нового года, ты получишь особое видео-поздравление от меня 🥂\n\n"
         "Вперёд, к новым попкам!",
         reply_markup=markup
@@ -92,67 +88,75 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     text = update.message.text
-
-    # ===== ОПРЕДЕЛЯЕМ ТЕКУЩИЙ "ДЕНЬ" =====
-    TEST_MODE = True  # ← поменяй на False в продакшене!
-    if TEST_MODE:
-        today = get_current_test_day()
-        test_day_number = int(today.split("_")[-1])
-        logging.info(f"test_day_number = {test_day_number}")
-        is_new_year = test_day_number >= 2  # ← НГ на 2-й "день"
-    else:
-        today = str(date.today())
-        is_new_year = date.today() >= date(2026, 1, 1)
+    today = get_current_test_day()
+    # Извлекаем номер "дня" из строки
+    test_day_number = int(today.split("_")[-1])
+    # today = str(date.today())
 
     data = load_data()
-    user = data.setdefault(user_id, {
-        "last_claimed_date": None,
-        "next_image_index": 0,
-        "has_received_final_greeting": False
-    })
+    user = data.setdefault(user_id, {"last_claimed_date": None, "next_image_index": 0})
 
-    # ===== ПОЗДРАВЛЕНИЕ ПРИ ПЕРВОМ ВЗАИМОДЕЙСТВИИ ПОСЛЕ НГ =====
-    if is_new_year and not user.get("has_received_final_greeting", False):
-        await update.message.reply_animation(
-            FINAL_MEDIA,
-            caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
-        )
-        user["has_received_final_greeting"] = True
-        save_data(data)
-
-    # ===== ОБРАБОТКА КНОПОК =====
+    # === ФИНАЛЬНОЕ ПОЗДРАВЛЕНИЕ ===
+    if not user.get("has_received_final_greeting", False):
+       # ===== РЕЖИМ ТЕСТА =====
+       TEST_MODE = True  # ← поменяй на False в продакшене!
+       if TEST_MODE:
+          # Используем "тестовые дни"
+          test_day_number = int(today.split("_")[-1])
+          TEST_FINAL_DAY = 2  # ← поздравление на "день" №2 (т.е. через 2 минуты)
+          if test_day_number >= TEST_FINAL_DAY:
+             await update.message.reply_animation(
+                FINAL_MEDIA,
+                caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+             )
+             user["has_received_final_greeting"] = True
+             save_data(data)
+       # ===== РЕЖИМ ПРОДАКШЕНА =====
+       else:
+          now = date.today()
+          FINAL_DATE = date(2026, 1, 1)
+          if now >= FINAL_DATE:
+             await update.message.reply_animation(
+                FINAL_MEDIA,
+                caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+             )
+             user["has_received_final_greeting"] = True
+             save_data(data)
+   
     if text == "Повторить приветствие":
         await start(update, context)
 
     elif text == "Получить картинку":
-        if is_new_year:
-            # 👇 После НГ картинки больше не отправляются
-            await update.message.reply_text(
-                "🎆 2026 год уже наступил! Время попок 🍑 кончилось!"
-            )
-        else:
-            # 👇 До НГ — обычная логика
+         idx = user["next_image_index"]
+         total_images = len(IMAGES)
+         remaining = total_images - idx  # сколько картинок ещё не отправлено
+
+         if text == "Получить картинку":
             if user["last_claimed_date"] == today:
-                idx = user["next_image_index"]
-                total_images = len(IMAGES)
-                remaining = total_images - idx
-                await update.message.reply_text(
-                    f"Сегодняшняя попка 🍑 уже получена! {remaining} попок осталось."
-                )
+               # Уже брали картинку сегодня
+               if idx >= total_images:
+                  await update.message.reply_text("🎉 Ты собрал все картинки!")
+               else:
+                  await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
             else:
-                idx = user["next_image_index"]
-                total_images = len(IMAGES)
-                remaining = total_images - idx
-                if idx < total_images:
-                    await update.message.reply_photo(
+                  # Берём новую картинку
+                  if idx < total_images:
+                     # Отправляем картинку
+                     await update.message.reply_photo(
                         IMAGES[idx],
-                        caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining}"
-                    )
-                    user["last_claimed_date"] = today
-                    user["next_image_index"] = idx + 1
-                    save_data(data)
-                else:
-                    await update.message.reply_text("🎉 Ура! Ты собрал все попки! 🍑")
+                        caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining - 1}"
+                     )
+                     user["last_claimed_date"] = today
+                     user["next_image_index"] = idx + 1
+
+                     # Проверка: это была последняя картинка?
+                     if idx + 1 == total_images:
+                        await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
+
+                     save_data(data)
+                  else:
+                     # На всякий случай (если idx как-то вышел за пределы)
+                     await update.message.reply_text("🎉 Ты собрал все картинки!")
 
     else:
         await update.message.reply_text("Неизвестная команда. Используй кнопки ниже.")
