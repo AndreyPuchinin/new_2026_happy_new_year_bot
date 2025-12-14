@@ -63,8 +63,8 @@ def save_data(data):
 def get_current_test_day():
     now = datetime.now()
     # Каждые 2 минуты — новый "день"
-    epoch = now #- datetime(2025, 12, 1)  # базовая дата (начало ТЗ)
-    minutes_since_start = int(epoch.total_seconds() // 60)
+    epoch = datetime(2025, 12, 1) - now  # базовая дата (начало ТЗ)
+    minutes_since_start = -int(epoch.total_seconds() // 60)
     test_day_number = minutes_since_start # // 1 # // 2  # каждые 2 минуты — новый день
     return f"test_day_{test_day_number}"
 
