@@ -71,7 +71,7 @@ def get_current_test_day():
 # ========== HANDLERS ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        ["Получить картинку"],
+        ["Получить попку 🍑"],
         ["Повторить приветствие"]
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
@@ -81,6 +81,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "У меня для тебя 14 новогодних попок. За день я могу прислать тебе всего 1 попку)\n\n"
         "Не пропускай дни и ты получишь максимум новогоднего настроения 🎄\n\n"
         "А если останешься со мной до нового года, ты получишь особое видео-поздравление от меня 🥂\n\n"
+        "Подпишись на мой канал, чтобы оставаться со мной не только в рамках нового года и смотреть на попки круглый год:\n"
+        "https://t.me/tacsolos\n\n"
+        "А бота для меня сделал Андрей Кубик, вот его канал:\n"
+        "https://t.me/AndyKybik\n\n"
         "Вперёд, к новым попкам!",
         reply_markup=markup
     )
@@ -136,28 +140,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if user["last_claimed_date"] == today:
                # Уже брали картинку сегодня
                if idx >= total_images:
-                  await update.message.reply_text("🎉 Ты собрал все картинки!")
+                  await update.message.reply_text("🎉 Ты собрал все попки! 🍑")
                else:
-                  await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
+                  await update.message.reply_text(f"Сегодняшняя попка 🍑 уже получена! {remaining} попок осталось.")
             else:
                   # Берём новую картинку
                   if idx < total_images:
                      # Отправляем картинку
                      await update.message.reply_photo(
                         IMAGES[idx],
-                        caption=f"🖼️ Картинка {idx + 1} из {total_images}. Осталось: {remaining - 1}"
+                        caption=f"🍑 Попка {idx + 1} из {total_images}. {remaining - 1} попок осталось."
                      )
                      user["last_claimed_date"] = today
                      user["next_image_index"] = idx + 1
 
                      # Проверка: это была последняя картинка?
                      if idx + 1 == total_images:
-                        await update.message.reply_text("🎉 Ура! Ты собрал все картинки!")
+                        await update.message.reply_text("🎉 Ура! Ты собрал все попки! 🍑")
 
                      save_data(data)
                   else:
                      # На всякий случай (если idx как-то вышел за пределы)
-                     await update.message.reply_text("🎉 Ты собрал все картинки!")
+                     await update.message.reply_text("🎉 Ты собрал все попки! 🍑")
 
     else:
         await update.message.reply_text("Неизвестная команда. Используй кнопки ниже.")
