@@ -60,12 +60,18 @@ def save_data(data):
     requests.patch(GIST_URL, headers=headers, json=payload)
         
 #========== TEMP TIME CHANGE FOR TESTS ==========
+# Фиксируем момент первого импорта модуля — это и есть "время старта теста"
+_START_TIME = datetime.now()
+
 def get_current_test_day():
+    """Возвращает номер 'дня' с момента запуска бота (в тестовом режиме).
+    1 'день' = 1 минута.
+    """
     now = datetime.now()
-    # Берём ТОЛЬКО минуты текущего часа (0–59)
-    current_minute = now.minute
-    # Каждая минута = 1 "день"
-    return f"test_day_{current_minute}"
+    elapsed_seconds = (now - _START_TIME).total_seconds()
+    # Каждую 1 минуты = 60 секунд → новый "день"
+    day_number = int(elapsed_seconds // 60)
+    return f"test_day_{day_number}"
    
 # def get_current_test_day():
 #    now = datetime.now()
