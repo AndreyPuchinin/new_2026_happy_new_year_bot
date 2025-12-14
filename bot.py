@@ -63,7 +63,7 @@ def save_data(data):
 def get_current_test_day():
     now = datetime.now()
     # Каждые 2 минуты — новый "день"
-    epoch = now - datetime(2025, 12, 1)  # базовая дата (начало ТЗ)
+    epoch = now #- datetime(2025, 12, 1)  # базовая дата (начало ТЗ)
     minutes_since_start = int(epoch.total_seconds() // 60)
     test_day_number = minutes_since_start # // 1 # // 2  # каждые 2 минуты — новый день
     return f"test_day_{test_day_number}"
@@ -71,7 +71,7 @@ def get_current_test_day():
 # ========== HANDLERS ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        ["Получить картинку"],
+        ["Получить попку 🍑"],
         ["Повторить приветствие"]
     ]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
