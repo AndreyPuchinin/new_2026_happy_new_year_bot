@@ -98,6 +98,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if TEST_MODE:
         today = get_current_test_day()
         test_day_number = int(today.split("_")[-1])
+        logging.info(f"test_day_number = {test_day_number}")
         is_new_year = test_day_number >= 2  # ← НГ на 2-й "день"
     else:
         today = str(date.today())
