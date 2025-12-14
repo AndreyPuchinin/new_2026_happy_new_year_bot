@@ -31,7 +31,7 @@ IMAGES = [
    "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
 ]
 # FINAL_MEDIA = "https://yadi.sk/i/final.gif"  # или .mp4
-FINAL_MEDIA = "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/sketch-1764885466374.jpg"
+FINAL_MEDIA = "https://raw.githubusercontent.com/AndreyPuchinin/new_2026_happy_new_year_bot/main/поздравляшка пока без звука.mp4"
 
 # Flask-часть (не нужна)
 # @bot.route('/ping')
@@ -128,18 +128,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await start(update, context)
 
     elif text == "Получить картинку":
-         idx = user["next_image_index"]
-         total_images = len(IMAGES)
-         remaining = total_images - idx  # сколько картинок ещё не отправлено
-
-         if text == "Получить картинку":
-            if user["last_claimed_date"] == today:
-               # Уже брали картинку сегодня
-               if idx >= total_images:
-                  await update.message.reply_text("🎉 Ты собрал все картинки!")
+        if is_new_year:
+            # 👇 После НГ картинки больше не отправляются
+            await update.message.reply_text(
+                "🎆 2026 год уже наступил! Новогодний марафон завершён. Спасибо, что был со мной!"
+            )
+        else:
+            # 👇 До НГ — обычная логика
+            idx = user["next_image_index"]
+            total_images = len(IMAGES)
+            remaining = total_images - idx  # сколько картинок ещё не отправлено
+         
+            if text == "Получить картинку":
+               if user["last_claimed_date"] == today:
+                  # Уже брали картинку сегодня
+                  if idx >= total_images:
+                     await update.message.reply_text("🎉 Ты собрал все картинки!")
+                  else:
+                     await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
                else:
-                  await update.message.reply_text(f"🖼️ Картинка за сегодня уже получена! Осталось: {remaining}")
-            else:
                   # Берём новую картинку
                   if idx < total_images:
                      # Отправляем картинку
