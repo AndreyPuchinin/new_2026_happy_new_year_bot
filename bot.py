@@ -2,7 +2,7 @@ import os
 import json
 import logging
 import requests
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -11,6 +11,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 GIST_ID = os.environ["GIST_ID"]
 GIST_TOKEN = os.environ["GIST_TOKEN"]
 GIST_URL = f"https://api.github.com/gists/{GIST_ID}"
+ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
 
 PORT = int(os.environ.get("PORT", 10000))
 BOT_TOKEN = os.environ["BOT_TOKEN"]
@@ -82,26 +83,31 @@ _START_TIME = datetime.now()
 #    test_day_number = minutes_since_start # // 1 # // 2  # каждые 2 минуты — новый день
 #    return f"test_day_{test_day_number}"
 
-# ========== ОТПРАВКА ПОЗДРАВЛЕНИЯ ВСЕМ ==========
-async def send_new_year_to_all():
-    """Отправляет НГ-поздравление ВСЕМ пользователям из Gist (один раз каждому)."""
-    bot = Application.builder().token(BOT_TOKEN).build().bot  # создаём только bot-инстанс
+# ========== РАЗБУДИТЬ СЕРВЕР ОТ МЕНЯ ДЛЯ ПОЗДРАВЛЕНИЯ ВСЕМ ==========
+async def trigger_new_year_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_USER_ID:
+        await update.message.reply_text("🔒 Доступ запрещён.")
+        return
+    await update.message.reply_text("📤 Запускаю рассылку НГ...")
+    await send_new_year_to_all(context.bot)  # ← передаём bot
+    await update.message.reply_text("✅ Рассылка завершена.")
 
+# ========== ОТПРАВКА ПОЗДРАВЛЕНИЯ ВСЕМ ==========
+async def send_new_year_to_all(bot_instance):
     data = load_data()
-    for user_id, user_data in data.items():
+    for user_id_str, user_data in data.items():
         if not user_data.get("has_received_final_greeting", False):
             try:
-                await bot.send_animation(
-                    chat_id=user_id,
+                await bot_instance.send_animation(
+                    chat_id=int(user_id_str),  # ← user_id из Gist — строка!
                     animation=FINAL_MEDIA,
                     caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
                 )
-                # Обновляем флаг
                 user_data["has_received_final_greeting"] = True
                 save_data(data)
-                logging.info(f"Поздравление отправлено пользователю {user_id}")
+                logging.info(f"Поздравление отправлено: {user_id_str}")
             except Exception as e:
-                logging.error(f"Не удалось отправить пользователю {user_id}: {e}")
+                logging.error(f"Ошибка для {user_id_str}: {e}")
 
 # ========== HANDLERS ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -139,7 +145,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Московское время = UTC+3
         moscow_tz = timezone(timedelta(hours=3))
         today = datetime.now(moscow_tz).date().isoformat()
-        is_new_year = date.today() >= date(2026, 1, 1)
+        now_moscow = datetime.now(moscow_tz).date()
+        is_new_year = now_moscow >= date(2026, 1, 1)
 
     # ==== ЗАГРУЖАЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ====
     data = load_data()
@@ -202,6 +209,9 @@ def main():
     bot = Application.builder().token(BOT_TOKEN).build()
     bot.add_handler(CommandHandler("start", start))
     bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # Регистрируем СПЕЦИАЛЬНУЮ команду для рассылки
+    bot.add_handler(CommandHandler("send_ng", trigger_new_year_broadcast))
 
     SERVICE_NAME = "new-2026-happy-new-year-bot"  # ← замени на имя твоего сервиса!
     service_webhook_url = f"https://{SERVICE_NAME}.onrender.com/{BOT_TOKEN}"
