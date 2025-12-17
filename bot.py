@@ -82,6 +82,27 @@ _START_TIME = datetime.now()
 #    test_day_number = minutes_since_start # // 1 # // 2  # каждые 2 минуты — новый день
 #    return f"test_day_{test_day_number}"
 
+# ========== ОТПРАВКА ПОЗДРАВЛЕНИЯ ВСЕМ ==========
+async def send_new_year_to_all():
+    """Отправляет НГ-поздравление ВСЕМ пользователям из Gist (один раз каждому)."""
+    bot = Application.builder().token(BOT_TOKEN).build().bot  # создаём только bot-инстанс
+
+    data = load_data()
+    for user_id, user_data in data.items():
+        if not user_data.get("has_received_final_greeting", False):
+            try:
+                await bot.send_animation(
+                    chat_id=user_id,
+                    animation=FINAL_MEDIA,
+                    caption="🎆 С Новым годом! Пусть 2026 будет волшебным!"
+                )
+                # Обновляем флаг
+                user_data["has_received_final_greeting"] = True
+                save_data(data)
+                logging.info(f"Поздравление отправлено пользователю {user_id}")
+            except Exception as e:
+                logging.error(f"Не удалось отправить пользователю {user_id}: {e}")
+
 # ========== HANDLERS ==========
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -115,7 +136,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logging.info(f"test_day_number = {test_day_number}")
         is_new_year = test_day_number >= 2  # ← НГ на 2-й минуте
     else:
-        today = str(date.today())
+        # Московское время = UTC+3
+        moscow_tz = timezone(timedelta(hours=3))
+        today = datetime.now(moscow_tz).date().isoformat()
         is_new_year = date.today() >= date(2026, 1, 1)
 
     # ==== ЗАГРУЖАЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ====
